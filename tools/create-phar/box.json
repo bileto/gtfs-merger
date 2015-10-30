@@ -1,0 +1,15 @@
+
+{
+    "base-path": "../../",
+    "directories": [
+        "src",
+        "vendor"
+    ],
+    "files": [
+        "src/config.neon"
+    ],
+    "main": "src/index.php",
+    "output": "gtfs-merger.phar",
+    "stub": true,
+    "compression": "GZ"
+}
