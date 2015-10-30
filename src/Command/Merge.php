@@ -12,6 +12,7 @@ use GtfsMerger\Merger\StopTimes;
 use GtfsMerger\Merger\Trips;
 use GtfsMerger\Output\GtfsWriter;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -22,7 +23,7 @@ class Merge extends Command
     private $agencyMerger;
 
     /** @var Routes */
-    private $routeMerger;
+    private $routesMerger;
 
     /** @var Stops */
     private $stopsMerger;
@@ -47,7 +48,7 @@ class Merge extends Command
 
     function __construct(
         Agency $agencyMerger,
-        Routes $routeMerger,
+        Routes $routesMerger,
         Stops $stopsMerger,
         Calendar $calendarMerger,
         CalendarDates $calendarDatesMerger,
@@ -58,7 +59,7 @@ class Merge extends Command
     )
     {
         $this->agencyMerger = $agencyMerger;
-        $this->routeMerger = $routeMerger;
+        $this->routesMerger = $routesMerger;
         $this->stopsMerger = $stopsMerger;
         $this->calendarMerger = $calendarMerger;
         $this->calendarDatesMerger = $calendarDatesMerger;
@@ -83,29 +84,39 @@ class Merge extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $files = $input->getArgument('files');
-        foreach ($files as $file) {
-            dump($file);
-            $agencies = $this->agencyMerger->merge($file);
-            $routes = $this->routeMerger->merge($file);
-            $stops = $this->stopsMerger->merge($file);
-            $calendar = $this->calendarMerger->merge($file);
-            $calendarDates = $this->calendarDatesMerger->merge($file);
-            $trips = $this->tripsMerger->merge($file);
-            $stopTimes = $this->stopTimesMerger->merge($file);
+        $progress = $this->getProgressBar($output);
+        $progress->start(count($files));
 
-            $this->gtfsWriter->append('agency.txt', $agencies);
-            $this->gtfsWriter->append('routes.txt', $routes);
-            $this->gtfsWriter->append('stops.txt', $stops);
-            $this->gtfsWriter->append('calendar.txt', $calendar);
-            $this->gtfsWriter->append('calendar_dates.txt', $calendarDates);
-            $this->gtfsWriter->append('trips.txt', $trips);
-            $this->gtfsWriter->append('stop_times.txt', $stopTimes);
+        foreach ($files as $file) {
+            $progress->advance();
+            $progress->setMessage($file, 'file');
+
+            $this->processGtfs($file, $progress);
+
             $this->cacheCleaner->clean();
-            dump(\PHP_Timer::resourceUsage());
         }
         $this->createGtfs();
+        $progress->finish();
+    }
 
-        dump(\PHP_Timer::resourceUsage());
+    private function processGtfs($file, ProgressBar $progress)
+    {
+        $mergers = [
+            'agencyMerger' => 'agency.txt',
+            'routesMerger' => 'routes.txt',
+            'stopsMerger' => 'stops.txt',
+            'calendarMerger' => 'calendar.txt',
+            'calendarDatesMerger' => 'calendar_dates.txt',
+            'tripsMerger' => 'trips.txt',
+            'stopTimesMerger' => 'stop_times.txt',
+        ];
+
+        foreach ($mergers as $merger => $subfile) {
+            $progress->setMessage($subfile, 'gtfs_part');
+            $progress->display();
+            $items = $this->{$merger}->merge($file);
+            $this->gtfsWriter->append($subfile, $items);
+        }
     }
 
     private function createGtfs($filename = null)
@@ -115,5 +126,19 @@ class Merge extends Command
         }
         $this->gtfsWriter->save($filename);
         $this->gtfsWriter->clean();
+    }
+
+    private function getProgressBar(OutputInterface $output)
+    {
+        $output->writeln(''); // do not override command line
+
+        $progress = new ProgressBar($output);
+        $progress->setFormat('%file%: %gtfs_part%' . "\n"
+            . '%current%/%max% [%bar%] %percent:3s%% %elapsed:6s%'
+        );
+        $progress->setMessage('', 'file');
+        $progress->setMessage('', 'gtfs_part');
+        // TODO: add memory usage, total stops, dates...
+        return $progress;
     }
 }
