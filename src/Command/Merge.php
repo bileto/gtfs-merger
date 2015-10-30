@@ -73,7 +73,7 @@ class Merge extends Command
     protected function configure()
     {
         ini_set('memory_limit', -1);
-        date_default_timezone_set('UTC');
+        date_default_timezone_set('UTC'); // TODO: should be removed, it's set in config.neon, but container is ignoring yet
 
         $this->setName('merge')
             ->setDescription('Merge given GTFS files into one')

@@ -6,7 +6,8 @@ use Symfony\Component\Console;
 require __DIR__ . '/../vendor/autoload.php';
 
 $loader = new DI\ContainerLoader(sys_get_temp_dir(), TRUE);
-$class = $loader->load('', function(DI\Compiler $compiler) {
+$class = $loader->load(time(), function(DI\Compiler $compiler) {
+    $compiler->addExtension('php', new DI\Extensions\PhpExtension());
     $compiler->loadConfig(__DIR__ . '/config.neon');
 });
 /** @var DI\Container $container */
