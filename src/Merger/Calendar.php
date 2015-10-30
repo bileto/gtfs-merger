@@ -40,7 +40,7 @@ class Calendar
             $currentId = $data['service_id'];
             $newId = $this->idsCache->load($currentId);
             if ($newId === null) {
-                $newId = $this->uuidProvider->uuid4();
+                $newId = $this->uuidProvider->uuid4()->toString();
 
                 $this->idsCache->save($currentId, $newId);
 

@@ -50,7 +50,7 @@ class Trips
             $data = array_combine($header, $data);
 
             $currentId = $data['trip_id'];
-            $newId = $this->uuidProvider->uuid4();
+            $newId = $this->uuidProvider->uuid4()->toString();
 
             $data['trip_id'] = $newId;
             $data['route_id'] = $this->getRouteId($data['route_id']);

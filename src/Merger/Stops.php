@@ -51,7 +51,7 @@ class Stops
             $currentId = $data['stop_id'];
             $newId = $this->findInCache($data);
             if ($newId === null) {
-                $newId = $this->uuidProvider->uuid4();
+                $newId = $this->uuidProvider->uuid4()->toString();
 
                 $this->idsCache->save($currentId, $newId);
                 $this->saveInNamesCache($data, $newId);

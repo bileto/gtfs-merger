@@ -52,7 +52,7 @@ class Routes
             $currentId = $data['route_id'];
             $newId = $this->namesCache->load($key);
             if ($newId === null) {
-                $newId = $this->uuidProvider->uuid4();
+                $newId = $this->uuidProvider->uuid4()->toString();
                 $this->idsCache->save($currentId, $newId);
                 $this->namesCache->save($key, $newId);
 
