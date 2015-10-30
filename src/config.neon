@@ -1,0 +1,35 @@
+services:
+
+    - GtfsMerger\Command\Merge
+
+    - GtfsMerger\Merger\Agency(@agencyNamesCache, @agencyIdsCache)
+    - GtfsMerger\Merger\Routes(@agencyIdsCache, @routesNamesCache, @routesIdsCache)
+    - GtfsMerger\Merger\Stops(@stopsIdsCache, @stopsNamesCache, @stopsLatLngCache)
+    - GtfsMerger\Merger\Calendar(@serviceIdsCache)
+    - GtfsMerger\Merger\CalendarDates(@serviceIdsCache)
+    - GtfsMerger\Merger\Trips(@routesIdsCache, @serviceIdsCache, @tripsIdsCache)
+    - GtfsMerger\Merger\StopTimes(@tripsIdsCache, @stopsIdsCache)
+
+    - GtfsMerger\Cache\Cleaner(@agencyIdsCache, @routesIdsCache, @stopsIdsCache, @serviceIdsCache, @tripsIdsCache)
+
+    - GtfsMerger\Output\CsvStdOutPrinter
+    - GtfsMerger\Output\GtfsWriter
+
+    - Ramsey\Uuid\UuidFactory
+
+    cacheStorage:
+        class: Nette\Caching\Storages\MemoryStorage
+
+    agencyIdsCache: Nette\Caching\Cache(namespace: 'agencyId')
+    agencyNamesCache: Nette\Caching\Cache(namespace: 'agencyName')
+
+    routesIdsCache: Nette\Caching\Cache(namespace: 'routesId')
+    routesNamesCache: Nette\Caching\Cache(namespace: 'routesName')
+
+    stopsIdsCache: Nette\Caching\Cache(namespace: 'stopsId')
+    stopsNamesCache: Nette\Caching\Cache(namespace: 'stopsName')
+    stopsLatLngCache: Nette\Caching\Cache(namespace: 'stopLatLng')
+
+    serviceIdsCache: Nette\Caching\Cache(namespace: 'serviceId')
+
+    tripsIdsCache: Nette\Caching\Cache(namespace: 'tripsId')
