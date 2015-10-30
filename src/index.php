@@ -1,5 +1,6 @@
 <?php
 
+use GtfsMerger\Console\Application;
 use Nette\DI;
 use Symfony\Component\Console;
 
@@ -13,7 +14,10 @@ $class = $loader->load(time(), function(DI\Compiler $compiler) {
 /** @var DI\Container $container */
 $container = new $class();
 
-$app = new Console\Application('GTFS Merger');
+$configParams = $container->getParameters();
+$version = $configParams['version'];
+$build = $configParams['build'];
+$app = new Application('GTFS Merger', $version, $build);
 
 $commands = $container->findByType(Console\Command\Command::class);
 foreach ($commands as $command) {

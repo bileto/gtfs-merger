@@ -1,3 +1,7 @@
+parameters:
+    version: "v0.0.1"
+    build: null
+
 php:
     date.timezone: UTC
 
