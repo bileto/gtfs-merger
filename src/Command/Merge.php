@@ -146,7 +146,7 @@ class Merge extends Command
             'stopTimesMerger' => 'stop_times.txt',
         ];
 
-        if (!file_exists($file)) {
+        if (!is_readable($file)) {
             throw new InvalidArgumentException('Cannot read file/s in path "' . $file . '". Aborting.');
         }
         $zip = new ZipArchiveAdapter($file);
