@@ -11,12 +11,21 @@ use GtfsMerger\Merger\Stops;
 use GtfsMerger\Merger\StopTimes;
 use GtfsMerger\Merger\Trips;
 use GtfsMerger\Output\GtfsWriter;
+use League\Flysystem\ZipArchive\ZipArchiveAdapter;
+use Nette\InvalidArgumentException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Class Merge
+ *
+ * @package GtfsMerger\Command
+ * @author Michal Sänger
+ */
 class Merge extends Command
 {
     /** @var Agency */
@@ -46,6 +55,18 @@ class Merge extends Command
     /** @var GtfsWriter */
     private $gtfsWriter;
 
+    /**
+     * Merge constructor.
+     * @param Agency $agencyMerger
+     * @param Routes $routesMerger
+     * @param Stops $stopsMerger
+     * @param Calendar $calendarMerger
+     * @param CalendarDates $calendarDatesMerger
+     * @param Trips $tripsMerger
+     * @param StopTimes $stopTimesMerger
+     * @param Cleaner $cleaner
+     * @param GtfsWriter $gtfsWriter
+     */
     function __construct(
         Agency $agencyMerger,
         Routes $routesMerger,
@@ -56,8 +77,7 @@ class Merge extends Command
         StopTimes $stopTimesMerger,
         Cleaner $cleaner,
         GtfsWriter $gtfsWriter
-    )
-    {
+    ) {
         $this->agencyMerger = $agencyMerger;
         $this->routesMerger = $routesMerger;
         $this->stopsMerger = $stopsMerger;
@@ -71,6 +91,9 @@ class Merge extends Command
         parent::__construct();
     }
 
+    /**
+     *
+     */
     protected function configure()
     {
         ini_set('memory_limit', -1);
@@ -78,9 +101,17 @@ class Merge extends Command
 
         $this->setName('merge')
             ->setDescription('Merge given GTFS files into one')
-            ->addArgument('files', InputArgument::IS_ARRAY, 'Input GTFS files', []);
+            ->addOption('output', 'o', InputOption::VALUE_OPTIONAL, 'Specify output filename')
+            ->addArgument('files', InputArgument::IS_ARRAY, 'Path to GTFS files. Wildcards are accepted.', [])
+
+        ;
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return void
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $files = $input->getArgument('files');
@@ -95,10 +126,14 @@ class Merge extends Command
 
             $this->cacheCleaner->clean();
         }
-        $this->createGtfs();
+        $this->createGtfs($input->getOption('output'), $output);
         $progress->finish();
     }
 
+    /**
+     * @param $file
+     * @param ProgressBar $progress
+     */
     private function processGtfs($file, ProgressBar $progress)
     {
         $mergers = [
@@ -111,23 +146,44 @@ class Merge extends Command
             'stopTimesMerger' => 'stop_times.txt',
         ];
 
+        if (!file_exists($file)) {
+            throw new InvalidArgumentException('Cannot read file/s in path "' . $file . '". Aborting.');
+        }
+        $zip = new ZipArchiveAdapter($file);
+
         foreach ($mergers as $merger => $subfile) {
             $progress->setMessage($subfile, 'gtfs_part');
             $progress->display();
-            $items = $this->{$merger}->merge($file);
+
+            $resource = $zip->readStream($subfile);
+
+            if ($resource === false || !is_resource($resource['stream'])) {
+                throw new InvalidArgumentException('Cannot find or read GTFS part "' . $subfile . '" in file "' . $file . '". Aborting.');
+            }
+
+            $items = $this->{$merger}->merge($resource['stream']);
             $this->gtfsWriter->append($subfile, $items);
         }
     }
 
-    private function createGtfs($filename = null)
+    /**
+     * @param null $filename
+     * @param OutputInterface $output
+     */
+    private function createGtfs($filename = null, OutputInterface $output)
     {
         if ($filename === null) {
             $filename = 'merged_gtfs_' . date('Y_m_d_His') . '.zip';
         }
         $this->gtfsWriter->save($filename);
+        $output->writeln('Writing to '.$filename.'...');
         $this->gtfsWriter->clean();
     }
 
+    /**
+     * @param OutputInterface $output
+     * @return ProgressBar
+     */
     private function getProgressBar(OutputInterface $output)
     {
         $output->writeln(''); // do not override command line

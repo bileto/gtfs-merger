@@ -7,7 +7,7 @@ use Nette\Caching\Cache;
 use Nette\InvalidStateException;
 use Ramsey\Uuid\UuidFactory;
 
-class StopTimes
+class StopTimes implements MergerInterface
 {
     /** @var Cache */
     private $tripsIdsCache;
@@ -25,15 +25,11 @@ class StopTimes
     }
 
     /**
-     * @param string $file
+     * @param resource $stream
      * @return array
      */
-    public function merge($file)
+    public function merge($stream)
     {
-        // TODO: next two lines into service
-        $zip = new ZipArchiveAdapter($file);
-        $stream = $zip->readStream('stop_times.txt')['stream'];
-
         $items = [];
         $header = fgetcsv($stream);
         while(($data = fgetcsv($stream)) !== false) {
