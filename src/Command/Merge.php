@@ -118,6 +118,13 @@ class Merge extends Command
         if (!count($files)){
             throw new InvalidArgumentException('No input files specified. See gtfs-merger merge --help for details.');
         }
+
+        /*
+         * Workaround for stdout mess
+         * Couldn't find out any other solution
+         */
+        echo `clear`;
+
         $progress = $this->getMergerProgressBar($output);
         $progress->start(count($files));
 
@@ -184,6 +191,7 @@ class Merge extends Command
         }
         $this->gtfsWriter->save($filename, $progressBar);
         $this->gtfsWriter->clean();
+        $progressBar->advance();
     }
 
     /**
@@ -206,7 +214,7 @@ class Merge extends Command
             . " Processing %file%/%gtfs_part% \n"
             . " Elapsed: %elapsed:6s%, ~%estimated:-6s% remaining\n"
             . " Memory usage: %memory:6s% \n"
-            . str_pad('', 80, '-')
+            . str_pad('', 80, '-') ."\n"
         );
         $progress->setMessage('', 'file');
         $progress->setMessage('', 'gtfs_part');
@@ -229,11 +237,11 @@ class Merge extends Command
         $progress->setBarWidth(60);
         $progress->setFormat(
             str_pad('', 80, '-') . "\n\n"
-            . " <comment>Writing output GTFS ...</comment> \n\n"
+            . " <comment>Writing ZIP ...</comment> \n\n"
             . " %current%/%max% [%bar%] <fg=green>%percent:3s%%</> \n\n"
             . " Target: %file% \n"
             . " Elapsed: %elapsed:6s%, ~%estimated:-6s% remaining\n"
-            . str_pad('', 80, '-')
+            . str_pad('', 80, '-') . "\n"
         );
         $progress->setMessage('', 'file');
         return $progress;

@@ -39,12 +39,12 @@ class GtfsWriter
      */
     public function save($filename, ProgressBar $progressBar)
     {
-        $progressBar->start(count($this->tmpFiles));
+        $progressBar->start(count($this->tmpFiles)+1);
         $progressBar->setMessage($filename, 'file');
         $zip = new ZipArchiveAdapter($filename);
         foreach ($this->tmpFiles as $path => $tmpFile) {
-            $progressBar->advance();
             $zip->writeStream($path, $tmpFile, new Config());
+            $progressBar->advance();
         }
     }
 
