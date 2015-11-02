@@ -22,6 +22,9 @@ class GtfsWriter
      */
     public function append($path, array $items)
     {
+        if (count($items) === 0) {
+            return;
+        }
         if (!isset($this->tmpFiles[$path])) {
             $tmpFile = tmpfile();
             $first = reset($items);
