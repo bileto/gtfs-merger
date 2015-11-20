@@ -38,10 +38,10 @@ class Cleaner
 
     public function clean()
     {
-        $this->agencyIdsCache->clean();
-        $this->routesIdsCache->clean();
-        $this->stopsIdsCache->clean();
-        $this->serviceIdsCache->clean();
-        $this->tripsIdsCache->clean();
+        $this->agencyIdsCache->clean([Cache::ALL => true]);
+        $this->routesIdsCache->clean([Cache::ALL => true]);
+        $this->stopsIdsCache->clean([Cache::ALL => true]);
+        $this->serviceIdsCache->clean([Cache::ALL => true]);
+        $this->tripsIdsCache->clean([Cache::ALL => true]);
     }
 }
