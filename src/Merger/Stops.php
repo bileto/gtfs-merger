@@ -74,7 +74,7 @@ class Stops implements MergerInterface
     {
         $key = $this->getLatLngCacheKey($stop);
         if (is_string($key)) {
-            $this->latLngCache->save($key, $stopId);
+            //$this->latLngCache->save($key, $stopId);
         }
     }
 

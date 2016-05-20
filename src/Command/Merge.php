@@ -10,6 +10,7 @@ use GtfsMerger\Merger\Routes;
 use GtfsMerger\Merger\Stops;
 use GtfsMerger\Merger\StopTimes;
 use GtfsMerger\Merger\Trips;
+use GtfsMerger\Merger\ExternalIDs;
 use GtfsMerger\Output\GtfsWriter;
 use League\Flysystem\ZipArchive\ZipArchiveAdapter;
 use Nette\InvalidArgumentException;
@@ -49,6 +50,9 @@ class Merge extends Command
     /** @var StopTimes */
     private $stopTimesMerger;
 
+    /** @var ExternalIDs */
+    private $externalIDsMerger;
+
     /** @var Cleaner */
     private $cacheCleaner;
 
@@ -64,6 +68,7 @@ class Merge extends Command
      * @param CalendarDates $calendarDatesMerger
      * @param Trips $tripsMerger
      * @param StopTimes $stopTimesMerger
+     * @param ExternalIDs $externalIDsMerger
      * @param Cleaner $cleaner
      * @param GtfsWriter $gtfsWriter
      */
@@ -75,6 +80,7 @@ class Merge extends Command
         CalendarDates $calendarDatesMerger,
         Trips $tripsMerger,
         StopTimes $stopTimesMerger,
+        ExternalIDs $externalIDsMerger,
         Cleaner $cleaner,
         GtfsWriter $gtfsWriter
     ) {
@@ -85,6 +91,7 @@ class Merge extends Command
         $this->calendarDatesMerger = $calendarDatesMerger;
         $this->tripsMerger = $tripsMerger;
         $this->stopTimesMerger = $stopTimesMerger;
+        $this->externalIDsMerger = $externalIDsMerger;
         $this->gtfsWriter = $gtfsWriter;
         $this->cacheCleaner = $cleaner;
 
@@ -144,6 +151,7 @@ class Merge extends Command
             'calendarDatesMerger' => 'calendar_dates.txt',
             'tripsMerger' => 'trips.txt',
             'stopTimesMerger' => 'stop_times.txt',
+            'externalIDsMerger' => 'stop_external_ids.txt',
         ];
 
         if (!is_readable($file)) {
