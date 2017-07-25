@@ -56,6 +56,8 @@ class Merge extends Command
 
     /** @var FeedInfo */
     private $feedInfoMerger;
+    private $feed_info_already_seen;
+
     /** @var Cleaner */
     private $cacheCleaner;
 
@@ -131,6 +133,8 @@ class Merge extends Command
         $progress = $this->getProgressBar($output);
         $progress->start(count($files));
 
+        $this->feed_info_already_seen = false;
+
         foreach ($files as $file) {
             $progress->advance();
             $progress->setMessage($file, 'file');
@@ -167,6 +171,12 @@ class Merge extends Command
         $zip = new ZipArchiveAdapter($file);
 
         foreach ($mergers as $merger => $subfile) {
+            if ($subfile === 'feed_info.txt') {
+                if ($this->feed_info_already_seen) {
+                    continue;
+                }
+                $this->feed_info_already_seen = true;
+            }
             $progress->setMessage($subfile, 'gtfs_part');
             $progress->display();
 
