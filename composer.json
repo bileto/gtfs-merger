@@ -5,7 +5,8 @@
         "phpunit/php-timer": "^1.0",
         "nette/di": "^2.3",
         "ramsey/uuid": "^3.0",
-        "nette/caching": "^2.4"
+        "nette/caching": "^2.4",
+        "phpunit/phpunit": "^6.2"
     },
     "autoload": {
         "psr-4": {

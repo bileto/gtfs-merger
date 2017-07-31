@@ -11,6 +11,7 @@ use GtfsMerger\Merger\Stops;
 use GtfsMerger\Merger\StopTimes;
 use GtfsMerger\Merger\Trips;
 use GtfsMerger\Merger\ExternalIDs;
+use GtfsMerger\Merger\FeedInfo;
 use GtfsMerger\Output\GtfsWriter;
 use League\Flysystem\ZipArchive\ZipArchiveAdapter;
 use Nette\InvalidArgumentException;
@@ -53,6 +54,10 @@ class Merge extends Command
     /** @var ExternalIDs */
     private $externalIDsMerger;
 
+    /** @var FeedInfo */
+    private $feedInfoMerger;
+    private $feed_info_already_seen;
+
     /** @var Cleaner */
     private $cacheCleaner;
 
@@ -69,6 +74,7 @@ class Merge extends Command
      * @param Trips $tripsMerger
      * @param StopTimes $stopTimesMerger
      * @param ExternalIDs $externalIDsMerger
+     * @param FeedInfo $feedInfoMerger
      * @param Cleaner $cleaner
      * @param GtfsWriter $gtfsWriter
      */
@@ -81,6 +87,7 @@ class Merge extends Command
         Trips $tripsMerger,
         StopTimes $stopTimesMerger,
         ExternalIDs $externalIDsMerger,
+        FeedInfo $feedInfoMerger,
         Cleaner $cleaner,
         GtfsWriter $gtfsWriter
     ) {
@@ -92,6 +99,7 @@ class Merge extends Command
         $this->tripsMerger = $tripsMerger;
         $this->stopTimesMerger = $stopTimesMerger;
         $this->externalIDsMerger = $externalIDsMerger;
+        $this->feedInfoMerger = $feedInfoMerger;
         $this->gtfsWriter = $gtfsWriter;
         $this->cacheCleaner = $cleaner;
 
@@ -125,6 +133,8 @@ class Merge extends Command
         $progress = $this->getProgressBar($output);
         $progress->start(count($files));
 
+        $this->feed_info_already_seen = false;
+
         foreach ($files as $file) {
             $progress->advance();
             $progress->setMessage($file, 'file');
@@ -152,6 +162,7 @@ class Merge extends Command
             'tripsMerger' => 'trips.txt',
             'stopTimesMerger' => 'stop_times.txt',
             'externalIDsMerger' => 'stop_external_ids.txt',
+            'feedInfoMerger' => 'feed_info.txt'
         ];
 
         if (!is_readable($file)) {
@@ -160,6 +171,12 @@ class Merge extends Command
         $zip = new ZipArchiveAdapter($file);
 
         foreach ($mergers as $merger => $subfile) {
+            if ($subfile === 'feed_info.txt') {
+                if ($this->feed_info_already_seen) {
+                    continue;
+                }
+                $this->feed_info_already_seen = true;
+            }
             $progress->setMessage($subfile, 'gtfs_part');
             $progress->display();
 
