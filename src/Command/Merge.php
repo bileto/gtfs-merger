@@ -130,21 +130,35 @@ class Merge extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $files = $input->getArgument('files');
-        $progress = $this->getProgressBar($output);
+        if (!count($files)){
+            throw new InvalidArgumentException('No input files specified. See gtfs-merger merge --help for details.');
+        }
+
+        /*
+         * Workaround for stdout mess
+         * Couldn't find out any other solution
+         */
+        echo `clear`;
+
+        $progress = $this->getMergerProgressBar($output);
         $progress->start(count($files));
 
         $this->feed_info_already_seen = false;
 
         foreach ($files as $file) {
             $progress->advance();
-            $progress->setMessage($file, 'file');
+            $progress->setMessage(ltrim(strrchr($file, '/'), '/'), 'file');
 
             $this->processGtfs($file, $progress);
 
             $this->cacheCleaner->clean();
         }
-        $this->createGtfs($input->getOption('output'), $output);
         $progress->finish();
+        $progress->clear();
+        $progress = $this->getWriterProgressBar($output);
+        $this->createGtfs($input->getOption('output'), $progress);
+        $progress->finish();
+
     }
 
     /**
@@ -193,33 +207,68 @@ class Merge extends Command
 
     /**
      * @param null $filename
-     * @param OutputInterface $output
+     * @param ProgressBar $progressBar
      */
-    private function createGtfs($filename = null, OutputInterface $output)
+    private function createGtfs($filename = null, ProgressBar $progressBar)
     {
         if ($filename === null) {
             $filename = 'merged_gtfs_' . date('Y_m_d_His') . '.zip';
         }
-        $this->gtfsWriter->save($filename);
-        $output->writeln('Writing to '.$filename.'...');
+        $this->gtfsWriter->save($filename, $progressBar);
         $this->gtfsWriter->clean();
+        $progressBar->advance();
     }
 
     /**
      * @param OutputInterface $output
      * @return ProgressBar
      */
-    private function getProgressBar(OutputInterface $output)
+    private function getMergerProgressBar(OutputInterface $output)
     {
         $output->writeln(''); // do not override command line
 
         $progress = new ProgressBar($output);
-        $progress->setFormat('%file%: %gtfs_part%' . "\n"
-            . '%current%/%max% [%bar%] %percent:3s%% %elapsed:6s%'
+        $progress->setProgressCharacter('<fg=green>▒</>');
+        $progress->setBarCharacter('<fg=green>▒</>');
+        $progress->setEmptyBarCharacter(' ');
+        $progress->setBarWidth(60);
+        $progress->setFormat(
+             str_pad('', 80, '-') . "\n\n"
+            . " <comment>Merging GTFS ...</comment> \n\n"
+            . " %current%/%max% [%bar%] <fg=green>%percent:3s%%</> \n\n"
+            . " Processing %file%/%gtfs_part% \n"
+            . " Elapsed: %elapsed:6s%, ~%estimated:-6s% remaining\n"
+            . " Memory usage: %memory:6s% \n"
+            . str_pad('', 80, '-') ."\n"
         );
         $progress->setMessage('', 'file');
         $progress->setMessage('', 'gtfs_part');
-        // TODO: add memory usage, total stops, dates...
+        // TODO: total stops, dates...
+        return $progress;
+    }
+
+    /**
+     * @param OutputInterface $output
+     * @return ProgressBar
+     */
+    private function getWriterProgressBar(OutputInterface $output)
+    {
+        $output->writeln(''); // do not override command line
+
+        $progress = new ProgressBar($output);
+        $progress->setProgressCharacter('<fg=red>▒</>');
+        $progress->setBarCharacter('<fg=red>▒</>');
+        $progress->setEmptyBarCharacter(' ');
+        $progress->setBarWidth(60);
+        $progress->setFormat(
+            str_pad('', 80, '-') . "\n\n"
+            . " <comment>Writing ZIP ...</comment> \n\n"
+            . " %current%/%max% [%bar%] <fg=green>%percent:3s%%</> \n\n"
+            . " Target: %file% \n"
+            . " Elapsed: %elapsed:6s%, ~%estimated:-6s% remaining\n"
+            . str_pad('', 80, '-') . "\n"
+        );
+        $progress->setMessage('', 'file');
         return $progress;
     }
 }
