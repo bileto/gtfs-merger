@@ -6,7 +6,7 @@ class MergeTest extends TestCase
 {
     public function testGtfsMerging()
     {
-        $cache_dir = __DIR__ . "/.cache";
+        $cache_dir = "/tmp/phpunit";
         try {
             if (!is_dir($cache_dir))
                 mkdir($cache_dir);
@@ -18,7 +18,7 @@ class MergeTest extends TestCase
 
         $input_a = __DIR__ . "/assets/inputA.zip";
         $input_b = __DIR__ . "/assets/inputB.zip";
-        $test_output = __DIR__ . "/.cache/output.zip";
+        $test_output = $cache_dir . "/output.zip";
 
         shell_exec("php src/index.php merge $input_a $input_b --output $test_output");
 
@@ -54,5 +54,3 @@ class MergeTest extends TestCase
 
     }
 }
-?>
-
