@@ -12,9 +12,9 @@ sed -i.bak "s/build: null/build: \"$BUILD\"/g" ../../src/config.neon
 rm ../../src/config.neon.bak
 
 # Build phar file
-box build
-mv gtfs-merger.phar gtfs-merger
-chmod 744 gtfs-merger
+php -c ./../../custom-php.ini -f ./../../vendor/bin/box build -v \
+&& mv gtfs-merger.phar gtfs-merger \
+&& chmod 744 gtfs-merger
 
 # Revert changes in config
 git checkout -- ../../src/config.neon

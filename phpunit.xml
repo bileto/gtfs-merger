@@ -1,0 +1,23 @@
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/6.1/phpunit.xsd"
+        colors="true"
+        beStrictAboutChangesToGlobalState="true"
+        beStrictAboutTestsThatDoNotTestAnything="true"
+        beStrictAboutTodoAnnotatedTests="true"
+>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">.</directory>
+            <exclude>
+                <directory>tests</directory>
+                <directory>vendor</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+    <testsuites>
+        <testsuite name="UnitTests">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
