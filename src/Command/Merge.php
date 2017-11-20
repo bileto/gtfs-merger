@@ -191,7 +191,12 @@ class Merge extends Command
             $resource = $zip->readStream($subfile);
 
             if ($resource === false || !is_resource($resource['stream'])) {
-                throw new InvalidArgumentException('Cannot find or read GTFS part "' . $subfile . '" in file "' . $file . '". Aborting.');
+                if ($subfile === 'stop_time_limitations.txt') {
+                    continue;
+                }
+                else {
+                    throw new InvalidArgumentException('Cannot find or read GTFS part "' . $subfile . '" in file "' . $file . '". Aborting.');
+                }
             }
 
             $items = $this->{$merger}->merge($resource['stream']);
