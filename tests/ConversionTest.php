@@ -44,7 +44,7 @@ class MergeTest extends TestCase
         unlink($test_output);
         rmdir($cache_dir);
 
-        $this->assertEquals(9, $count_files_inside_gtfs_zip);
+        $this->assertEquals(10, $count_files_inside_gtfs_zip);
 
         $expected_feed_info_content = ["feed_publisher_name,feed_publisher_url,feed_lang,script_version",
                                         "Bileto,https://bileto.com,cs,0.2.1", ""];
