@@ -17,6 +17,7 @@ services:
     - GtfsMerger\Merger\Trips(@routesIdsCache, @serviceIdsCache, @tripsIdsCache)
     - GtfsMerger\Merger\StopTimes(@tripsIdsCache, @stopsIdsCache)
     - GtfsMerger\Merger\ExternalIDs(@stopsIdsCache)
+    - GtfsMerger\Merger\StopTimeLimitations(@tripsIdsCache, @stopsIdsCache)
     - GtfsMerger\Merger\FeedInfo()
 
     - GtfsMerger\Cache\Cleaner(@stopsIdsCache, @serviceIdsCache, @tripsIdsCache)

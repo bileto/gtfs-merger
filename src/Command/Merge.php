@@ -8,6 +8,7 @@ use GtfsMerger\Merger\Calendar;
 use GtfsMerger\Merger\CalendarDates;
 use GtfsMerger\Merger\Routes;
 use GtfsMerger\Merger\Stops;
+use GtfsMerger\Merger\StopTimeLimitations;
 use GtfsMerger\Merger\StopTimes;
 use GtfsMerger\Merger\Trips;
 use GtfsMerger\Merger\ExternalIDs;
@@ -54,6 +55,9 @@ class Merge extends Command
     /** @var ExternalIDs */
     private $externalIDsMerger;
 
+    /** @var StopTimeLimitations */
+    private $stopTimeLimitationsMerger;
+
     /** @var FeedInfo */
     private $feedInfoMerger;
     private $feed_info_already_seen;
@@ -74,6 +78,7 @@ class Merge extends Command
      * @param Trips $tripsMerger
      * @param StopTimes $stopTimesMerger
      * @param ExternalIDs $externalIDsMerger
+     * @param StopTimeLimitations $stopTimeLimitationsMerger
      * @param FeedInfo $feedInfoMerger
      * @param Cleaner $cleaner
      * @param GtfsWriter $gtfsWriter
@@ -87,6 +92,7 @@ class Merge extends Command
         Trips $tripsMerger,
         StopTimes $stopTimesMerger,
         ExternalIDs $externalIDsMerger,
+        StopTimeLimitations $stopTimeLimitationsMerger,
         FeedInfo $feedInfoMerger,
         Cleaner $cleaner,
         GtfsWriter $gtfsWriter
@@ -99,6 +105,7 @@ class Merge extends Command
         $this->tripsMerger = $tripsMerger;
         $this->stopTimesMerger = $stopTimesMerger;
         $this->externalIDsMerger = $externalIDsMerger;
+        $this->stopTimeLimitationsMerger = $stopTimeLimitationsMerger;
         $this->feedInfoMerger = $feedInfoMerger;
         $this->gtfsWriter = $gtfsWriter;
         $this->cacheCleaner = $cleaner;
@@ -162,6 +169,7 @@ class Merge extends Command
             'tripsMerger' => 'trips.txt',
             'stopTimesMerger' => 'stop_times.txt',
             'externalIDsMerger' => 'stop_external_ids.txt',
+            'stopTimeLimitationsMerger' => 'stop_time_limitations.txt',
             'feedInfoMerger' => 'feed_info.txt'
         ];
 
