@@ -53,7 +53,6 @@ class MergeTest extends TestCase
             }
         }
         zip_close($zip);
-        echo $test_output;
         unlink($test_output);
         rmdir($cache_dir);
 
