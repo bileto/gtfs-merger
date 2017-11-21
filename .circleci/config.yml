@@ -15,6 +15,7 @@ jobs:
           key: composer-v1-{{ checksum "composer.json" }}
           paths:
             - vendor
+      - run: vendor/bin/phpunit tests
       - run: cd ./tools/create-phar/ && ./create.sh && cd ./../../
       - store_artifacts:
           path: ./tools/create-phar/gtfs-merger
