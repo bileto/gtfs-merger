@@ -34,14 +34,14 @@ class StopTimeLimitations implements MergerInterface
         while(($data = fgetcsv($stream)) !== false) {
             $data = array_combine($header, $data);
 
-            $currentId = $data['trip_id'];
+            $currentId = $data['trip_id'] ?? null;
             $newId = $this->tripsIdsCache->load($currentId);
             if ($newId === null) {
                 throw new InvalidStateException('Unknown trip ID: ' . $currentId);
             }
             $data['trip_id'] = $newId;
 
-            $currentId = $data['stop_id'];
+            $currentId = $data['stop_id'] ?? null;
             $newId = $this->stopsIdsCache->load($currentId);
             if ($newId === null) {
                 throw new InvalidStateException('Unknown stop ID: ' . $currentId);
