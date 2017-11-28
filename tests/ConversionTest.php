@@ -34,7 +34,19 @@ class MergeTest extends TestCase
 
                 if ($name == 'feed_info.txt') {
                     if (zip_entry_open($zip, $zip_entry)) {
-                        $contents = zip_entry_read($zip_entry);
+                        $feed_info_file_content = zip_entry_read($zip_entry);
+                        zip_entry_close($zip_entry);
+                    }
+                }
+                if ($name == 'trips.txt') {
+                    if (zip_entry_open($zip, $zip_entry)) {
+                        $trips_file_content = zip_entry_read($zip_entry);
+                        zip_entry_close($zip_entry);
+                    }
+                }
+                if ($name == 'stop_time_limitations.txt') {
+                    if (zip_entry_open($zip, $zip_entry)) {
+                        $stop_time_lim_file_content = zip_entry_read($zip_entry);
                         zip_entry_close($zip_entry);
                     }
                 }
@@ -44,11 +56,24 @@ class MergeTest extends TestCase
         unlink($test_output);
         rmdir($cache_dir);
 
-        $this->assertEquals(9, $count_files_inside_gtfs_zip);
+        $this->assertEquals(10, $count_files_inside_gtfs_zip);
 
+        // Testing stop_time_limitations trip_id
+        $trips_content = explode(PHP_EOL, $trips_file_content);
+        $stop_time_lim_content = explode(PHP_EOL, $stop_time_lim_file_content);
+
+        $expected_trip_id_A = explode(',', $trips_content[1])[2];
+        $expected_trip_id_B = explode(',', $trips_content[2])[2];
+        $actual_trip_id_A = explode(',', $stop_time_lim_content[1])[0];
+        $actual_trip_id_B = explode(',', $stop_time_lim_content[3])[0];
+
+        $this->assertSame($expected_trip_id_A, $actual_trip_id_A);
+        $this->assertSame($expected_trip_id_B, $actual_trip_id_B);
+
+        // Testing feed_info content
         $expected_feed_info_content = ["feed_publisher_name,feed_publisher_url,feed_lang,script_version",
                                         "Bileto,https://bileto.com,cs,0.2.1", ""];
-        $actual_feed_info_content = explode(PHP_EOL, $contents);
+        $actual_feed_info_content = explode(PHP_EOL, $feed_info_file_content);
 
         $this->assertSame($expected_feed_info_content, $actual_feed_info_content);
 
