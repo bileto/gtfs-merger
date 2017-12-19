@@ -1,8 +1,9 @@
 # GTFS Merger
+
 Merge many GTFS files into one
 
-# Usage
+## Install and Usage
 
-1. Download executable file `gtfs-merger` from [circleci](https://circleci.com/gh/bileto/gtfs-merger) under tab Artifacts
-2. Run it `gtfs-merger -o out.zip directory/*`
-   where `-o` is output zip file for merged gtfs's
+1. Clone from Git the repository.
+2. To download dependencies, run `composer install` in _GTFS_MERGER_HOME_.
+3. Run `php src/index.php merge -o OUTPUT_FILE.zip /Absolute/Path/To/Input/Directory/With/file*.mask`.
