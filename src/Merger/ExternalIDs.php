@@ -2,25 +2,24 @@
 
 namespace GtfsMerger\Merger;
 
-use League\Flysystem\ZipArchive\ZipArchiveAdapter;
+use Nette\ArgumentOutOfRangeException;
 use Nette\Caching\Cache;
-use Ramsey\Uuid\UuidFactory;
 
 class ExternalIDs implements MergerInterface
 {
     /** @var Cache */
     private $idsCache;
 
-    /** @var UuidFactory */
-    private $uuidProvider;
+    /** @var Cache */
+    private $externalIdsCache;
 
     function __construct(
         Cache $idsCache,
-        UuidFactory $uuidProvider
+        Cache $externalIdsCache
     )
     {
         $this->idsCache = $idsCache;
-        $this->uuidProvider = $uuidProvider;
+        $this->externalIdsCache = $externalIdsCache;
     }
 
     /**
@@ -36,11 +35,20 @@ class ExternalIDs implements MergerInterface
             $currentId = $data['stop_id'];
             $newId = $this->idsCache->load($currentId);
             if ($newId === null) {
-                $newId = $this->uuidProvider->uuid4()->toString();
-                $this->idsCache->save($currentId, $newId);
+                throw new ArgumentOutOfRangeException('Unknown stop id: ' . $currentId);
             }
             $data['stop_id'] = $newId;
-            $items[] = $data;
+
+            $externalIdData = $this->externalIdsCache->load($newId);
+
+            if ($externalIdData) {
+                if ($externalIdData['type'] !== $data['type'] || $externalIdData['id'] !== $data['id']) {
+                    throw new ArgumentOutOfRangeException('Different station external IDs: ' . $currentId);
+                }
+            } else {
+                $this->externalIdsCache->save($newId, $data);
+                $items[] = $data;
+            }
         }
         return $items;
     }

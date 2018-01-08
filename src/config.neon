@@ -16,7 +16,7 @@ services:
     - GtfsMerger\Merger\CalendarDates(@serviceIdsCache)
     - GtfsMerger\Merger\Trips(@routesIdsCache, @serviceIdsCache, @tripsIdsCache)
     - GtfsMerger\Merger\StopTimes(@tripsIdsCache, @stopsIdsCache)
-    - GtfsMerger\Merger\ExternalIDs(@stopsIdsCache)
+    - GtfsMerger\Merger\ExternalIDs(@stopsIdsCache, @externalIdsCache)
     - GtfsMerger\Merger\StopTimeLimitations(@tripsIdsCache, @stopsIdsCache)
     - GtfsMerger\Merger\FeedInfo()
 
@@ -45,6 +45,7 @@ services:
         factory: GtfsMerger\Cache\Factory::create('routesName')
 
     stopsIdsCache: Nette\Caching\Cache(@cacheStorage, 'stopsId')
+    externalIdsCache: Nette\Caching\Cache(@cacheStorage, 'externalIds')
     stopsNamesCache: Nette\Caching\Cache(@cacheStorage, 'stopsName')
     stopsLatLngCache: Nette\Caching\Cache(@cacheStorage, 'stopLatLng')
 
